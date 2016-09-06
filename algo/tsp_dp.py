@@ -52,13 +52,13 @@ def tsp_dp(dist_dict):
 
     records = [ {} for i in xrange(1 << N) ]    # 2**N == 1 << N
     count = int(s, 2)
-    for i in xrange(N):
+    for i in xrange(1,N+1):
         if count >= MAX_INDEX:
             break
-        records[count][i+1] = dist_dict[0][i+1] # 对count代表的集合，从0出发，到达i+1点的单回路的距离
+        records[count][i] = (dist_dict[0][i],[0,i]) # 对count代表的集合，从0出发，到达i点的单回路的距离
         count=gosper_hack(count)
 
-    for i in range(1, N):
+    for i in range(2, N+1):
         s = s + "1"
         count = int(s, 2)
         while (count < MAX_INDEX):
@@ -66,11 +66,11 @@ def tsp_dp(dist_dict):
                 for (__, dnb) in neighbor(nb, N):
                     records[dnb] = []   # 释放空间，虽然增大了一倍的运算时间
 
-                for (end, length) in records[nb].iteritems():
+                for (end, (length,footprint)) in records[nb].iteritems():
                     if j != end:
-                        new_len = min(records[count].get(j,MAX_LENGTH), length + dist_dict[end][j])
-                        if new_len<MAX_LENGTH:
-                            records[count][j] = new_len
+                        new_len =  length + dist_dict[end][j]
+                        if new_len < records[count].get(j,(MAX_LENGTH,))[0]:
+                            records[count][j] = (new_len, footprint+[j])
 
             count = gosper_hack(count)
 
